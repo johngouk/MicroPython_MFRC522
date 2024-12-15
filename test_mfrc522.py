@@ -3,7 +3,8 @@
 
 
 import unittest
-from machine import SoftSPI, Pin
+#from machine import SoftSPI, Pin
+from machine import SPI, Pin
 
 from micropython_mfrc522.mfrc522 import MFRC522
 
@@ -14,11 +15,11 @@ class TestMFRC522(unittest.TestCase):
         """
         # Setup
         input('\nPLEASE PLACE CARD IN FRONT OF READER TO PROCEED AND PRESS ENTER WHEN READY')
-        sck = Pin(18, Pin.OUT)
-        copi = Pin(23, Pin.OUT)
-        cipo = Pin(19, Pin.OUT)
-        spi = SoftSPI(baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
-        sda = Pin(21, Pin.OUT)
+        sck = Pin(14, Pin.OUT)
+        copi = Pin(13, Pin.OUT)
+        cipo = Pin(12, Pin.OUT)
+        spi = SPI(1, baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
+        sda = Pin(27, Pin.OUT)
 
         # Instantiate
         reader = MFRC522(spi, sda)
@@ -44,7 +45,7 @@ class TestMFRC522(unittest.TestCase):
         sck = Pin(18, Pin.OUT)
         copi = Pin(23, Pin.OUT)
         cipo = Pin(19, Pin.OUT)
-        spi = SoftSPI(baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
+        spi = SPI(baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
         sda = Pin(21, Pin.OUT)
 
         # Instantiate

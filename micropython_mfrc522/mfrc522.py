@@ -98,6 +98,7 @@ class MFRC522:
 		cs : int
 			Chip select
 		"""
+		print("MFRC522: __init__")
 		self.spi = spi
 		self.cs = cs
 		self.cs.value(1)
@@ -197,29 +198,41 @@ class MFRC522:
 		elif cmd == TRANSCEIVE:
 			irq_en = 0x77
 			wait_irq = 0x30
+		print("MFRC522: _tocard: 1")
 		self._write_reg(MFRC522_COML_EN_REG, irq_en | 0x80)
+		print("MFRC522: _tocard: 2")
 		self._clear_bit_mask(MFRC522_COM_IRQ_REG, 0x80)
+		print("MFRC522: _tocard: 3")
 		self._set_bit_mask(MFRC522_FIFO_LEVEL_REG, 0x80)
+		print("MFRC522: _tocard: 4")
 		self._write_reg(MFRC522_COMMAND_REG, 0x00)
 		for c in send:
+    		print("MFRC522: _tocard: 5")
 			self._write_reg(MFRC522_FIFO_DATA_REG, c)
+		print("MFRC522: _tocard: 6")
 		self._write_reg(MFRC522_COMMAND_REG, cmd)
 		if cmd == TRANSCEIVE:
+    		print("MFRC522: _tocard: 7")
 			self._set_bit_mask(MFRC522_BIT_FRAMING_REG, 0x80)
 		i = 2000
 		while True:
+    		print("MFRC522: _tocard: 8")
 			n = self._read_reg(MFRC522_COM_IRQ_REG)
 			i -= 1
 			if ~((i != 0) and ~(n & 0x01) and ~(n & wait_irq)):
 				break
+		print("MFRC522: _tocard: 9")
 		self._clear_bit_mask(MFRC522_BIT_FRAMING_REG, 0x80)
 		if i:
+    		print("MFRC522: _tocard: 10")
 			if (self._read_reg(MFRC522_ERROR_REG) & 0x1B) == 0x00:
 				status = self.OK
 				if n & irq_en & 0x01:
 					status = self.NOTAGERR
 				elif cmd == TRANSCEIVE:
-					n = self._read_reg(MFRC522_FIFO_LEVEL_REG)
+            		print("MFRC522: _tocard: 11")
+        			n = self._read_reg(MFRC522_FIFO_LEVEL_REG)
+            		print("MFRC522: _tocard: 12")
 					last_bits = self._read_reg(MFRC522_CONTROL_REG) & 0x07
 					if last_bits != 0:
 						bits = (n - 1) * 8 + last_bits
@@ -230,6 +243,7 @@ class MFRC522:
 					elif n > MAX_LEN:
 						n = MAX_LEN
 					for _ in range(n):
+                		print("MFRC522: _tocard: 13")
 						recv.append(self._read_reg(MFRC522_FIFO_DATA_REG))
 			else:
 				status = self.ERR
@@ -267,6 +281,7 @@ class MFRC522:
 		----------
 		None
 		"""
+		print("MFRC522: init")
 		self.reset()
 		self._write_reg(MFRC522_T_MODE_REG, 0x8D)
 		self._write_reg(MFRC522_T_PRESCALAR_REG, 0x3E)
@@ -287,6 +302,7 @@ class MFRC522:
 		-------
 		None
 		"""
+		print("MFRC522: reset")
 		self._write_reg(MFRC522_COMMAND_REG, 0x0F)
 
 	def antenna_on(self, on=True):
@@ -301,6 +317,7 @@ class MFRC522:
 		-------
 		None
 		"""
+		print("MFRC522: antenna_on")
 		if on and ~(self._read_reg(MFRC522_TX_CONTROL_REG) & 0x03):
 			self._set_bit_mask(MFRC522_TX_CONTROL_REG, 0x03)
 		else:
@@ -319,7 +336,10 @@ class MFRC522:
 		int
 			Returns an int of status and bit
 		"""
+		print("MFRC522: request")
+		print("MFRC522: request: _write_reg")
 		self._write_reg(MFRC522_BIT_FRAMING_REG, 0x07)
+		print("MFRC522: request: _tocard")
 		(status, recv, bits) = self._tocard(MFRC522_CONTROL_REG, [mode])
 		if (status != self.OK) | (bits != 0x10):
 			status = self.ERR
@@ -336,6 +356,7 @@ class MFRC522:
 		-------
 		None
 		"""
+		print("MFRC522: anticoll")		
 		serial_number_check = 0
 		serial_number = [ANTICOLL, 0x20]
 		self._write_reg(MFRC522_BIT_FRAMING_REG, 0x00)
@@ -363,6 +384,7 @@ class MFRC522:
 		bool
 			Returns a bool if OK or ERR if error
 		"""
+		print("MFRC522: select_tag")
 		buffer = [SELECT_TAG, 0x70] + serial_number[:5]
 		buffer += self._calculate_crc(buffer)
 		(status, recv, bits) = self._tocard(TRANSCEIVE, buffer)
@@ -387,6 +409,7 @@ class MFRC522:
 		bool
 			Returns a bool if OK or ERR if error
 		"""
+		print("MFRC522: auth")
 		return self._tocard(AUTHENTICATE, [mode, addr] + sect + serial_number[:4])[0]
 
 	def stop_crypto1(self):
@@ -400,6 +423,7 @@ class MFRC522:
 		-------
 		None
 		"""
+		print("MFRC522: stop_crypto1")
 		self._clear_bit_mask(MFRC522_STATUS_2_REG, 0x08)
 
 	def read(self, addr):
@@ -415,6 +439,7 @@ class MFRC522:
 		bool
 			Returns a bool if OK or None
 		"""
+		print("MFRC522: read")
 		data = [READ, addr]
 		data += self._calculate_crc(data)
 		(status, recv, _) = self._tocard(TRANSCEIVE, data)
@@ -435,6 +460,7 @@ class MFRC522:
 		int
 			Returns an int of the status
 		"""
+		print("MFRC522: write")
 		buffer = [WRITE, addr]
 		buffer += self._calculate_crc(buffer)
 		(status, recv, bits) = self._tocard(TRANSCEIVE, buffer)

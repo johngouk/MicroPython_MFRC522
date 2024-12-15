@@ -1,12 +1,17 @@
-from machine import Pin, SoftSPI
+from machine import Pin, SPI
 
 from micropython_mfrc522.mfrc522 import MFRC522
 
-sck = Pin(18, Pin.OUT)
-copi = Pin(23, Pin.OUT) # Controller out, peripheral in
-cipo = Pin(19, Pin.OUT) # Controller in, peripheral out
-spi = SoftSPI(baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
-sda = Pin(21, Pin.OUT)
+#sck = Pin(18, Pin.OUT)
+#copi = Pin(23, Pin.OUT) # Controller out, peripheral in
+#cipo = Pin(19, Pin.OUT) # Controller in, peripheral out
+#spi = SoftSPI(1, baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
+#sda = Pin(21, Pin.OUT)
+sck = Pin(14, Pin.OUT)
+copi = Pin(13, Pin.OUT)
+cipo = Pin(12, Pin.OUT)
+spi = SPI(1, baudrate=100000, polarity=0, phase=0, sck=sck, mosi=copi, miso=cipo)
+sda = Pin(27, Pin.OUT)
 reader = MFRC522(spi, sda)
 
 print('Place Card In Front Of Device To Read Unique Address')
@@ -31,5 +36,7 @@ while True:
                         print("AUTH ERROR")
                 else:
                     print("FAILED TO SELECT TAG")
+        else:
+            print(f"Status: {status}")
     except KeyboardInterrupt:
         break
